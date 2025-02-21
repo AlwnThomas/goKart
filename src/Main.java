@@ -4,19 +4,26 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class Main extends JPanel implements KeyListener {
-    private int kart1X = 350, kart1Y = 545;
-    private int kart2X = 350, kart2Y = 580;
-    private int speed = 5;
-    private Image trackImage, kart1, kart2;
+    private final int WIDTH = 850, HEIGHT = 650;
+
+    private Image trackImage;
+    private Image[] kart1Images = new Image[16];
+    private Image[] kart2Images = new Image[16];
+
+    private int kart1X = 350, kart1Y = 545, kart1Direction = 0, kart1Speed = 0;
+    private int kart2X = 350, kart2Y = 580, kart2Direction = 0, kart2Speed = 0;
 
     public Main() {
         // Load the images
         trackImage = new ImageIcon("goKart/resources/desertTrack.png").getImage();
-        kart1 = new ImageIcon("goKart/resources/Kart 1/4.png").getImage();
-        kart2 = new ImageIcon("goKart/resources/Kart 2/4.png").getImage();
+        
+        for (int i = 0; i < 16; i++) {
+            kart1Images[i] = new ImageIcon("goKart/resources/Kart 1/" + i + ".png").getImage();
+            kart2Images[i] = new ImageIcon("goKart/resources/Kart 2/" + i + ".png").getImage();
+        }
 
         // Set preferred size before adding to the frame
-        this.setPreferredSize(new Dimension(850, 650));
+        this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         // Create the window
         JFrame frame = new JFrame("Kart Racing Game");
@@ -26,6 +33,10 @@ public class Main extends JPanel implements KeyListener {
         frame.pack(); // Automatically set size based on panel's preferred size
         frame.setResizable(false);
         frame.setVisible(true);
+
+        // Start game loop
+        Timer timer = new Timer(50, e -> moveKarts());
+        timer.start();
     }
 
     @Override
@@ -38,10 +49,9 @@ public class Main extends JPanel implements KeyListener {
         drawKarts(g);
     }
 
-
     private void drawKarts(Graphics g) {
-        g.drawImage(kart1, kart1X, kart1Y, this); // Kart 1
-        g.drawImage(kart2, kart2X, kart2Y, this); // Kart 1
+        g.drawImage(kart1Images[kart1Direction], kart1X, kart1Y, this);
+        g.drawImage(kart2Images[kart2Direction], kart2X, kart2Y, this);
     }
 
     @Override
@@ -49,18 +59,37 @@ public class Main extends JPanel implements KeyListener {
         int key = e.getKeyCode();
 
         switch (key) {
-            case KeyEvent.VK_W -> kart1Y -= speed; // Kart 1 Up
-            case KeyEvent.VK_S -> kart1Y += speed; // Kart 1 Down
-            case KeyEvent.VK_A -> kart1X -= speed; // Kart 1 Left
-            case KeyEvent.VK_D -> kart1X += speed; // Kart 1 Right
+            // Kart 1 controls
+            case KeyEvent.VK_A -> kart1Direction = (kart1Direction + 15) % 16; // Rotate Left (22.5°)
+            case KeyEvent.VK_D -> kart1Direction = (kart1Direction + 1) % 16;  // Rotate Right (22.5°)
+            case KeyEvent.VK_W -> kart1Speed = Math.min(kart1Speed + 10, 100); // Accelerate
+            case KeyEvent.VK_S -> kart1Speed = Math.max(kart1Speed - 10, 0);   // Brake
 
-            case KeyEvent.VK_UP -> kart2Y -= speed; // Kart 2 Up
-            case KeyEvent.VK_DOWN -> kart2Y += speed; // Kart 2 Down
-            case KeyEvent.VK_LEFT -> kart2X -= speed; // Kart 2 Left
-            case KeyEvent.VK_RIGHT -> kart2X += speed; // Kart 2 Right
+            // Kart 2 controls
+            case KeyEvent.VK_LEFT -> kart2Direction = (kart2Direction + 15) % 16; // Rotate Left (22.5°)
+            case KeyEvent.VK_RIGHT -> kart2Direction = (kart2Direction + 1) % 16;  // Rotate Right (22.5°)
+            case KeyEvent.VK_UP -> kart2Speed = Math.min(kart2Speed + 10, 100); // Accelerate
+            case KeyEvent.VK_DOWN -> kart2Speed = Math.max(kart2Speed - 10, 0);  // Brake
         }
+
         repaint();
     }
+
+    public void moveKarts() {
+        // Convert 16-direction index to angle in degrees
+        double angle1 = Math.toRadians(kart1Direction * 22.5);
+        double angle2 = Math.toRadians(kart2Direction * 22.5);
+    
+        // Move Kart 1
+        kart1X += Math.cos(angle1) * kart1Speed / 10;  // Adjust X based on cos
+        kart1Y += Math.sin(angle1) * kart1Speed / 10;  // Adjust Y based on sin (invert Y-axis)
+    
+        // Move Kart 2
+        kart2X += Math.cos(angle2) * kart2Speed / 10;  // Adjust X based on cos
+        kart2Y += Math.sin(angle2) * kart2Speed / 10;  // Adjust Y based on sin (invert Y-axis)
+    
+        repaint();
+    }    
 
     @Override
     public void keyReleased(KeyEvent e) {}
