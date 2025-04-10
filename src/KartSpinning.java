@@ -1,24 +1,25 @@
 import javax.swing.*;
 
-public class KartSpinningGame extends JFrame {
+public class KartSpinning extends JFrame {
 
-    public KartSpinningGame() {
-        // Set up the main frame
+    public KartSpinning() {
+        //Setting Up the main JFrame
         setTitle("Kart Spinning Animation");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(400, 400);
 
-        // Create an instance of the KartAnimationPanel and add it to the frame
+        //Creating an instance of KartAnimation
         KartAnimationPanel animationPanel = new KartAnimationPanel();
+        //Adding it to JFrame
         add(animationPanel);
 
-        // Center the window on the screen
+        //Centering window on screen
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
     public static void main(String[] args) {
         // Start the kart spinning game
-        SwingUtilities.invokeLater(KartSpinningGame::new);
+        SwingUtilities.invokeLater(KartSpinning::new);
     }
 }
